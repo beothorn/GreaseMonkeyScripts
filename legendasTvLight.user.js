@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name           LegendasTvLight
 // @description    Deixa o visual do legendas tv mais simples
-// @version        0.1
+// @version        0.2
 // @author         Beothorn
 // @namespace      http://*legendas.tv/*
 // @include        http://*legendas.tv/*
@@ -108,6 +108,7 @@ killElementsFormXPath("/html/body/table/tbody/tr[2]/td/table/tbody/tr/td/div");
 killElementsFormXPath("/html/body/table/tbody/tr[2]/td/table/tbody/tr/td[2]/div/table/tbody/tr/td/div/table/tbody/tr/td[2]/div/div");
 killElementsFormXPath("/html/body/table/tbody/tr[2]/td/table/tbody/tr/td[2]/div/table/tbody/tr/td/div/table/tbody/tr/td[2]/div/div");
 killElementsFormXPath("/html/body/table/tbody/tr[2]/td/table/tbody/tr/td/table");
+killElementsFormXPath("/html/body/table/tbody/tr[4]");
 
 $(".quebra").remove();
 
