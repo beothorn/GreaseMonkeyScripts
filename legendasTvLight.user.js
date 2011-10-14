@@ -5,13 +5,37 @@
 // @author         Beothorn
 // @namespace      http://*legendas.tv/*
 // @include        http://*legendas.tv/*
+// @require       http://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js
 // ==/UserScript==
+
+
+if($('input[name="txtSenha"]') != null){
+  $('input[name="txtLogin"]').val("greasemonkey");
+  var senhaField = $('input[name="txtSenha"]');
+  senhaField.val("greasemonkey");
+
+GM_xmlhttpRequest({
+  method: "POST",
+  url: "http://legendas.tv/login_verificar.php",
+  data: "txtLogin=greasemonkey&txtSenha=greasemonkey",
+  headers: {
+    "Content-Type": "application/x-www-form-urlencoded"
+  },
+  onload: function(response) {
+  }
+});
+
+}
 
 var script = document.createElement('script'); 
 script.type = "text/javascript"; 
 script.innerHTML = (<><![CDATA[
 
 function tads(){
+}
+
+function abredown(download) {
+	window.location.href = "http://legendas.tv/info.php?c=1&d="+download;
 }
 
 ]]></>).toString();
@@ -69,16 +93,38 @@ for (var i = cells.length-1; i >=0; i--) {
 	cells[i].setAttribute("background", "");
 }
 
+var conteudodest = document.getElementById('conteudodest');
+conteudodest.setAttribute("bgcolor", "#FFFFFF");
+
 killElementsFormXPath("/html/body/table/tbody/tr[2]/td/table[2]/tbody/tr/td[2]/div/table[2]/tbody/tr/td[2]");
 killElementsFormXPath("/html/body/table/tbody/tr[2]/td/table/tbody/tr/td[2]/div/table[2]/tbody/tr/td/div/table");
 killElementsFormXPath("/html/body/table/tbody/tr[2]/td/table[2]/tbody/tr/td/table/tbody/tr");
 killElementsFormXPath("/html/body/table/tbody/tr[2]/td/table[2]/tbody/tr/td[2]/div/table");
 killElementsFormXPath("/html/body/table/tbody/tr[2]/td/table[2]/tbody/tr/td[2]/div/table/tbody/tr/td/div/table/tbody/tr");
 killElementsFormXPath("/html/body/table/tbody/tr[2]/td/table/tbody/tr");
+killElementsFormXPath("/html/body/table/tbody/tr[2]/td/table[2]/tbody/tr/td/div[2]");
+killElementsFormXPath("//*[@id=\"Table_01\"]");
+killElementsFormXPath("/html/body/table/tbody/tr[2]/td/table/tbody/tr/td/div");
+killElementsFormXPath("/html/body/table/tbody/tr[2]/td/table/tbody/tr/td[2]/div/table/tbody/tr/td/div/table/tbody/tr/td[2]/div/div");
+killElementsFormXPath("/html/body/table/tbody/tr[2]/td/table/tbody/tr/td[2]/div/table/tbody/tr/td/div/table/tbody/tr/td[2]/div/div");
+killElementsFormXPath("/html/body/table/tbody/tr[2]/td/table/tbody/tr/td/table");
+
+$(".quebra").remove();
 
 var kids = document.children;
 for(var i in kids){
 	kids[i].setAttribute("style", "");
 	kids[i].setAttribute("background", "");
 }
+var bgesquerda = getElementsByClassName('bgesquerda');
+for(var i in bgesquerda){
+	bgesquerda[i].setAttribute("style", 'background-image:"";');
+}
+
+$('.login').css({"background-color":"white"});
+$('.login').css({"border":"0"});
+$('.bgesquerda').css({"background-image":""});
+$('.bgesquerda').css({"background":""});
+$('.bgesquerda').css({"background-color":"white"});
+$('.smembros').css({"background-image":""});
 
