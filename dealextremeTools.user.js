@@ -14,12 +14,6 @@ TODO:
  - Support other post offices
 */
 
-var trackingNumberRegexPattern = ".*([A-Z]{2}[0-9]{9}[A-Z]{2}).*";
-var allowedParents = ['a'];
-var xpath = '//text()[(parent::' + allowedParents.join(' or parent::') +')]';
-var iterator = document.evaluate(xpath, document, null,XPathResult.UNORDERED_NODE_ITERATOR_TYPE, null);
-var nodeArray = new Array();
-
 var possibleStatus = new Array( 
 	{ caption: "Entregue", color: "green", blink: false }, 
 	{ caption: "Saiu para entrega", color: "Gold", blink: true }, 
@@ -27,14 +21,6 @@ var possibleStatus = new Array(
 	{ caption: "Encaminhado", color: "red", blink: false }, 
 	{ caption: "Postado", color: "red", blink: false } 
 );
-
-var thisNode = iterator.iterateNext();
-while (thisNode) {
-	if(thisNode.nodeValue.match(trackingNumberRegexPattern)){
-		nodeArray.push(thisNode);
-	}
-	thisNode = iterator.iterateNext();
-}
 
 function formatStatusLink(postOfficeTrackUrl, status) {
 	var ret = status.blink ? "<blink>" : "";
@@ -52,11 +38,9 @@ function createTrackingStatusLink(nodeToWriteStatus, trackingNumber){
 		for(var i in possibleStatus) {
 			var status = possibleStatus[i];
 			if((response.responseText).indexOf(status.caption)!= -1){
-				var statusLink = document.createElement("a");
-				statusLink.href = postOfficeTrackUrl;
-				statusLink.target = "_blank";
-				statusLink.innerHTML = formatStatusLink(postOfficeTrackUrl,status);
-				nodeToWriteStatus.appendChild(statusLink);
+				var href = postOfficeTrackUrl;
+				var innerHTML = formatStatusLink(postOfficeTrackUrl,status);
+				nodeToWriteStatus.append('<a href="'+href+'" target="_blank" >'+innerHTML+'</a>');
 				break;
 			}
 		}
@@ -64,13 +48,12 @@ function createTrackingStatusLink(nodeToWriteStatus, trackingNumber){
 	});
 }
 
-for(var i in nodeArray){
-	var nodeContent = nodeArray[i].nodeValue+"";
-	if(nodeContent != null){
-		var re = new RegExp(trackingNumberRegexPattern);
-		var match = re.exec(nodeContent);
-		if(match != null){
-			createTrackingStatusLink(nodeArray[i].parentNode.parentNode,match[1]);
+var trackingNumberRegexPattern = ".*([A-Z]{2}[0-9]{9}[A-Z]{2}).*";
+$('a').each(function() {
+	var linkText = $(this).text();
+	if(linkText != null){
+		if(linkText.match(trackingNumberRegexPattern)){
+			createTrackingStatusLink($(this).parent(),linkText);
 		}
 	}
-}
+});
