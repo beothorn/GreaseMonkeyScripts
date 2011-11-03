@@ -14,6 +14,27 @@ TODO:
  - Support other post offices
 */
 
+$('a').each(function() {
+	var link = $(this);
+	if(isTrakingNumberLink(link.text())){
+			log(link);
+			createTrackingStatusForLink(link);
+	}
+});
+
+function log(log){
+	var debug = false;
+	if(debug)
+		unsafeWindow.console.log(log)
+}
+
+function isTrakingNumberLink(text){
+	if(text==null)
+		return false;
+	var trackingNumberRegexPattern = ".*([A-Z]{2}[0-9]{9}[A-Z]{2}).*";
+	return text.match(trackingNumberRegexPattern);
+}
+
 var possibleStatus = new Array( 
 	{ caption: "Entregue", color: "green", blink: false }, 
 	{ caption: "Saiu para entrega", color: "Gold", blink: true }, 
@@ -22,38 +43,30 @@ var possibleStatus = new Array(
 	{ caption: "Postado", color: "red", blink: false } 
 );
 
+function createTrackingStatusForLink(link){
+	log("createTrackingStatusForLink "+link);
+	var postOfficeTrackUrl = "http://websro.correios.com.br/sro_bin/txect01$.Inexistente?P_LINGUA=001&P_TIPO=002&P_COD_LIS="+link.text();
+	GM_xmlhttpRequest({
+	  method: "GET",
+	  url: postOfficeTrackUrl,
+	  onload: function(response) {
+	  	log("response "+response);
+	  	log("possibleStatus "+possibleStatus);
+			for(var i in possibleStatus) {
+				var status = possibleStatus[i];
+				if((response.responseText).indexOf(status.caption)!= -1){
+					log("status.caption "+status.caption);
+					var innerHTML = formatStatusLink(postOfficeTrackUrl,status);
+					link.parent().append('<a href="'+postOfficeTrackUrl+'" target="_blank" >'+innerHTML+'</a>');
+					break;
+				}
+			}
+	  }
+	});
+}
+
 function formatStatusLink(postOfficeTrackUrl, status) {
 	var ret = status.blink ? "<blink>" : "";
 	ret += " <strong><font color=\"" + status.color + "\">" + status.caption + "</font></strong>";
 	return status.blink ? "</blink>" + ret : ret;
 }
-
-function createTrackingStatusLink(nodeToWriteStatus, trackingNumber){
-	var postOfficeTrackUrl = "http://websro.correios.com.br/sro_bin/txect01$.Inexistente?P_LINGUA=001&P_TIPO=002&P_COD_LIS="+trackingNumber;
-	GM_xmlhttpRequest({
-	  method: "GET",
-	  url: postOfficeTrackUrl,
-	  onload: function(response) {
-		console.log(response);
-		for(var i in possibleStatus) {
-			var status = possibleStatus[i];
-			if((response.responseText).indexOf(status.caption)!= -1){
-				var href = postOfficeTrackUrl;
-				var innerHTML = formatStatusLink(postOfficeTrackUrl,status);
-				nodeToWriteStatus.append('<a href="'+href+'" target="_blank" >'+innerHTML+'</a>');
-				break;
-			}
-		}
-	  }
-	});
-}
-
-var trackingNumberRegexPattern = ".*([A-Z]{2}[0-9]{9}[A-Z]{2}).*";
-$('a').each(function() {
-	var linkText = $(this).text();
-	if(linkText != null){
-		if(linkText.match(trackingNumberRegexPattern)){
-			createTrackingStatusLink($(this).parent(),linkText);
-		}
-	}
-});
