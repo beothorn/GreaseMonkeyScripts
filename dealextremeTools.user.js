@@ -12,6 +12,7 @@
 TODO: 
  - Show as a tooltip the date that the deal entered the matched status in a google-like form. Ex: "1 day ago", "1 week ago", 2010/03/28
  - Support other post offices
+ - InvoiceStatus. Order Received?
 */
 
 var possibleStatus = new Array( 
@@ -107,8 +108,7 @@ function getDetailsTableString(wholePageStr) {
 function getProductSkus(context) {
 	var allSkus = new Array();
 	$('a.sku',context).each(function() {
-		var skuLink = $(this);
-		allSkus.push( skuLink.text() );
+		allSkus.push( $(this).text() );
 	});
 	return allSkus;
 }
@@ -116,8 +116,7 @@ function getProductSkus(context) {
 function getProductStatus(context) {
 	var allStatus = new Array();
 	$('span[id$="lblStatus"]',context).each(function() {
-		var statusSpan = $(this);
-		allStatus.push( statusSpan.text() );
+		allStatus.push( $(this).text() );
 	});
 	return allStatus;
 }
@@ -125,10 +124,21 @@ function getProductStatus(context) {
 function getProductConfirmReceiptStatus(context) {
 	var allConfirmReceiptSpan = new Array();
 	$('span[id$="lblConfirmReceiptStatus"]',context).each(function() {
-		var confirmReceiptSpan = $(this);
-		allConfirmReceiptSpan.push( confirmReceiptSpan.text() );
+		allConfirmReceiptSpan.push( $(this).text() );
 	});
 	return allConfirmReceiptSpan;
+}
+
+function getConfirmReceiptEnablement(context) {
+	var allConfirmReceiptEnablement = new Array();
+	$('input',context).each(function() {
+		allConfirmReceiptEnablement.push( $(this).attr('disabled')!="disabled" );
+	});
+	return allConfirmReceiptEnablement;
+}
+
+function createBoxWithColor(context, color) {
+	context.append('&nbsp;<span style="background-color:' + color + '">&nbsp;&nbsp;&nbsp;&nbsp;</span>')
 }
 
 function calculateInvoiceStatus(context) {
@@ -136,6 +146,7 @@ function calculateInvoiceStatus(context) {
 	var skus = getProductSkus(context);
 	var status = getProductStatus(context);
 	var receiptStatus = getProductConfirmReceiptStatus(context);
+	var receiptEnablement = getConfirmReceiptEnablement(context);
 	var packing = false;
 	var shipped = false;
 	var received = false;
@@ -146,22 +157,20 @@ function calculateInvoiceStatus(context) {
 		if( status[i] == "Packing" ) {
 			packing = true;
 		} else if( status[i] == "Shipped" ) {
-			if( receiptStatus[i] == "No Received" ) {
+			//if( receiptStatus[i] == "No Received" ) {
+			if( receiptEnablement[i] ) {
 				shipped = true;
 			} else {
 				received = true;
 			}
 		}
 	}
-	if( packing ) {
-		context.append("&nbsp;<span style=\"background-color:OrangeRed\">&nbsp;&nbsp;&nbsp;&nbsp;</span>");
-	}
-	if( shipped ) {
-		context.append("&nbsp;<span style=\"background-color:Orange\">&nbsp;&nbsp;&nbsp;&nbsp;</span>");
-	}
-	if( received ) {
-		context.append("&nbsp;<span style=\"background-color:Green\">&nbsp;&nbsp;&nbsp;&nbsp;</span>");
-	}
+	if( packing )
+		createBoxWithColor(context,'OrangeRed');
+	if( shipped )
+		createBoxWithColor(context,'Orange');
+	if( received )
+		createBoxWithColor(context,'Green');
 }
 
 function createInvoiceStatusforLinks(invoiceLinks) {
