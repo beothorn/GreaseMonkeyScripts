@@ -22,16 +22,23 @@ var possibleStatus = new Array(
 	{ caption: "Postado", color: "red", blink: false } 
 );
 
-$('a').each(function() {
-	var link = $(this);
-	if(isTrakingNumberLink(link.text())){
-		//log(link);
-		createTrackingStatusForLink(link);
-	}else if(isInvoiceLink(link.attr("href"))){
-		//log(link);
-		createInvoiceStatusforLink(link);
-	}
-});
+function main() {
+	var invoiceLinks = new Array();
+	$('table#ctl00_content_Orders a').each(function() {
+		var link = $(this);
+		if(isTrakingNumberLink(link.text())){
+			//log(link);
+			createTrackingStatusForLink(link);
+		}else if(isInvoiceLink(link.attr("href"))){
+			//log(link);
+			invoiceLinks.push( link );
+		}
+	});
+	invoiceLinks.reverse();
+	createInvoiceStatusforLinks(invoiceLinks);
+}
+
+main();
 
 function log(log){
 	var debug = true;
@@ -124,38 +131,54 @@ function getProductConfirmReceiptStatus(context) {
 	return allConfirmReceiptSpan;
 }
 
-function test(context,text) {
-		//log(text);
-		//context.append(text);
-		//context.append(getDetailsTableString(text));
-		//var skus = getProductSkus(context);
-		//link.parent().append( '<span>' + skus + '</span>' );
-		//var status = getProductStatus(context);
-		//var receiptStatus = getProductConfirmReceiptStatus(context);
-		//$("#ctl00_content_gvOrderDetail",context).remove();
+function calculateInvoiceStatus(context) {
+	var i = 0;
+	var skus = getProductSkus(context);
+	var status = getProductStatus(context);
+	var receiptStatus = getProductConfirmReceiptStatus(context);
+	var packing = false;
+	var shipped = false;
+	var received = false;
+	for(i=0;i<skus.length;i++) {
+		if( skus[i]=="00000" || skus[i]=="01888" ) {
+			continue;
+		}
+		if( status[i] == "Packing" ) {
+			packing = true;
+		} else if( status[i] == "Shipped" ) {
+			if( receiptStatus[i] == "No Received" ) {
+				shipped = true;
+			} else {
+				received = true;
+			}
+		}
+	}
+	if( packing ) {
+		context.append("&nbsp;<span style=\"background-color:OrangeRed\">&nbsp;&nbsp;&nbsp;&nbsp;</span>");
+	}
+	if( shipped ) {
+		context.append("&nbsp;<span style=\"background-color:Orange\">&nbsp;&nbsp;&nbsp;&nbsp;</span>");
+	}
+	if( received ) {
+		context.append("&nbsp;<span style=\"background-color:Green\">&nbsp;&nbsp;&nbsp;&nbsp;</span>");
+	}
 }
 
-function createInvoiceStatusforLink(link){
-	//link.parent().append("<span style=\"background-color:green\">&nbsp;&nbsp;&nbsp;&nbsp;</span>");
+function createInvoiceStatusforLinks(invoiceLinks) {
+	if( invoiceLinks.length == 0 ) {
+		return;
+	}
+	var link = invoiceLinks.pop();
 	var invoiceUrl = link.attr("href");
-	//log(invoiceUrl);
 	GM_xmlhttpRequest({
 	  method: "GET",
 	  url: invoiceUrl,
 	  onload: function(response) {
-		log(link.text());
-		log(getDetailsTableString(response.responseText));
-		log("---------------------------------------------------------------------");
-		//test(link.parent(),response.responseText);
-		/*
-		link.parent().append( getDetailsTableString( response.responseText ) );
-		var skus = getProductSkus(link.parent());
-		link.parent().append( '<span>' + skus + '</span>' );
-		//var status = getProductStatus(link.parent());
-		//link.parent().append( '<span>' + status + '</span>' );
-		//var receiptStatus = getProductConfirmReceiptStatus(link.parent());
-		$("#ctl00_content_gvOrderDetail",link.parent()).remove();
-		*/
+		var context = link.parent();
+		context.append( getDetailsTableString( response.responseText ) );
+		calculateInvoiceStatus(context);
+		$("#ctl00_content_gvOrderDetail",context).remove();
+		createInvoiceStatusforLinks(invoiceLinks);
 	  }
 	});
 }
