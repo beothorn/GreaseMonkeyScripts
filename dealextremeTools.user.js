@@ -6,6 +6,7 @@
 // @namespace      http://www.dealextreme.com
 // @include        http://*dealextreme.com/*
 // @require       http://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js
+// @require       http://www.javascriptkit.com/script/script2/htmltooltip.js
 // ==/UserScript==
 
 /**
@@ -15,11 +16,11 @@ TODO:
 */
 
 var possibleStatus = new Array( 
-	{ caption: "Entregue", color: "green", blink: false }, 
-	{ caption: "Saiu para entrega", color: "Gold", blink: true }, 
-	{ caption: "Conferido", color: "Orange", blink: false }, 
-	{ caption: "Encaminhado", color: "red", blink: false }, 
-	{ caption: "Postado", color: "red", blink: false } 
+	{ caption: "Entregue", color: "green" }, 
+	{ caption: "Saiu para entrega", color: "Gold" }, 
+	{ caption: "Conferido", color: "Orange" }, 
+	{ caption: "Encaminhado", color: "red" }, 
+	{ caption: "Postado", color: "red" } 
 );
 
 function main() {
@@ -75,12 +76,8 @@ function createTrackingStatusForLink(link){
 }
 
 function formatStatusLink(postOfficeTrackUrl, status) {
-	var ret = status.blink ? "<blink>" : "";
-	ret += " <strong><font color=\"" + status.color + "\">" + status.caption + "</font></strong>";
-	return status.blink ? "</blink>" + ret : ret;
+	return '<strong><font color="' + status.color + '">' + status.caption + '</font></strong>';
 }
-
-
 
 ////////////////////////////////////////////////////////
 
