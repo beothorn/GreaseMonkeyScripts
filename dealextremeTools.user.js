@@ -12,7 +12,6 @@
 TODO: 
  - Show as a tooltip the date that the deal entered the matched status in a google-like form. Ex: "1 day ago", "1 week ago", 2010/03/28
  - Support other post offices
- - InvoiceStatus. Order Received?
 */
 
 var possibleStatus = new Array( 
@@ -121,14 +120,6 @@ function getProductStatus(context) {
 	return allStatus;
 }
 
-function getProductConfirmReceiptStatus(context) {
-	var allConfirmReceiptSpan = new Array();
-	$('span[id$="lblConfirmReceiptStatus"]',context).each(function() {
-		allConfirmReceiptSpan.push( $(this).text() );
-	});
-	return allConfirmReceiptSpan;
-}
-
 function getConfirmReceiptEnablement(context) {
 	var allConfirmReceiptEnablement = new Array();
 	$('input',context).each(function() {
@@ -142,22 +133,23 @@ function createBoxWithColor(context, color) {
 }
 
 function calculateInvoiceStatus(context) {
-	var i = 0;
 	var skus = getProductSkus(context);
 	var status = getProductStatus(context);
-	var receiptStatus = getProductConfirmReceiptStatus(context);
 	var receiptEnablement = getConfirmReceiptEnablement(context);
+	var pending = false;
 	var packing = false;
 	var shipped = false;
 	var received = false;
+	var i = 0;
 	for(i=0;i<skus.length;i++) {
 		if( skus[i]=="00000" || skus[i]=="01888" ) {
 			continue;
 		}
-		if( status[i] == "Packing" ) {
+		if( status[i] == "Pending" ) {
+			pending = true;
+		} else if( status[i] == "Packing" ) {
 			packing = true;
 		} else if( status[i] == "Shipped" ) {
-			//if( receiptStatus[i] == "No Received" ) {
 			if( receiptEnablement[i] ) {
 				shipped = true;
 			} else {
@@ -165,6 +157,8 @@ function calculateInvoiceStatus(context) {
 			}
 		}
 	}
+	if( pending )
+		createBoxWithColor(context,'Red');
 	if( packing )
 		createBoxWithColor(context,'OrangeRed');
 	if( shipped )
