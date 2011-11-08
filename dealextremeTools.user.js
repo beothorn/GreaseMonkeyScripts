@@ -1,12 +1,11 @@
 // ==UserScript==
 // @name           DealExtremeTools
 // @description    Automatically fetch the status of your deals looking up on Brasil post office traking numbers.
-// @version        0.1
+// @version        0.2
 // @author         github:matiasgrodriguez and github:beothorn
 // @namespace      http://www.dealextreme.com
 // @include        http://*dealextreme.com/*
 // @require       http://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js
-// @require       http://www.javascriptkit.com/script/script2/htmltooltip.js
 // ==/UserScript==
 
 /**
@@ -55,28 +54,36 @@ function isTrakingNumberLink(text){
 }
 
 function createTrackingStatusForLink(link){
-	//log("createTrackingStatusForLink "+link);
 	var postOfficeTrackUrl = "http://websro.correios.com.br/sro_bin/txect01$.Inexistente?P_LINGUA=001&P_TIPO=002&P_COD_LIS="+link.text();
 	GM_xmlhttpRequest({
 	  method: "GET",
 	  url: postOfficeTrackUrl,
 	  onload: function(response) {
 	  	//log("response "+response);
+		var context = link.parent();
+		context.append('<div id="trackingNumberPlaceholder">' + getTrackinTableString(response.responseText) + '</div>');
+		var toolTip = $('table tr:eq(1) td', context).first().text();
 		for(var i in possibleStatus) {
 			var status = possibleStatus[i];
 			if((response.responseText).indexOf(status.caption)!= -1){
-				//log("status.caption "+status.caption);
 				var innerHTML = formatStatusLink(postOfficeTrackUrl,status);
-				link.parent().append('<a href="'+postOfficeTrackUrl+'" target="_blank" >'+innerHTML+'</a>');
+				context.append(' <a href="'+postOfficeTrackUrl+'" target="_blank" title="' + toolTip + '">'+innerHTML+'</a>');
 				break;
 			}
 		}
+		$('#trackingNumberPlaceholder', context).remove();
 	  }
 	});
 }
 
 function formatStatusLink(postOfficeTrackUrl, status) {
 	return '<strong><font color="' + status.color + '">' + status.caption + '</font></strong>';
+}
+
+function getTrackinTableString(wholePageStr) {
+	var tableBeginIndex = wholePageStr.indexOf('<table');
+	var tableEndIndex = wholePageStr.indexOf('</TABLE>',tableBeginIndex) + 9;
+	return wholePageStr.substring(tableBeginIndex, tableEndIndex);
 }
 
 ////////////////////////////////////////////////////////
