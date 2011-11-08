@@ -83,7 +83,7 @@ function formatStatusLink(postOfficeTrackUrl, status) {
 function getTrackinTableString(wholePageStr) {
 	var tableBeginIndex = wholePageStr.indexOf('<table');
 	var tableEndIndex = wholePageStr.indexOf('</TABLE>',tableBeginIndex) + 9;
-	return wholePageStr.substring(tableBeginIndex, tableEndIndex);
+	return tableBeginIndex != -1 ? wholePageStr.substring(tableBeginIndex, tableEndIndex) : "";
 }
 
 ////////////////////////////////////////////////////////
@@ -181,11 +181,11 @@ function createInvoiceStatusforLinks(invoiceLinks) {
 	  method: "GET",
 	  url: invoiceUrl,
 	  onload: function(response) {
+		createInvoiceStatusforLinks(invoiceLinks);
 		var context = link.parent();
 		context.append( getDetailsTableString( response.responseText ) );
 		calculateInvoiceStatus(context);
 		$("#ctl00_content_gvOrderDetail",context).remove();
-		createInvoiceStatusforLinks(invoiceLinks);
 	  }
 	});
 }
