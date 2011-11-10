@@ -9,6 +9,6 @@
 // @require        http://github.com/beothorn/GreaseMonkeyScripts/raw/master/latest/dxlatest.js
 // ==/UserScript==
 
-$( 'form#aspnetForm' ).first().prepend( '<div>This is static...</div>' );
+$( 'form#aspnetForm' ).first().prepend( '<div>This is static2...</div>' );
 $( 'form#aspnetForm' ).first().prepend( '<div>Current Script Version is ' + dxCurrentVersion() + '</div>' );
 
