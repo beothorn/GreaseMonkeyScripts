@@ -6,9 +6,14 @@
 // @namespace      http://www.dealextreme.com
 // @include        http://*dealextreme.com/*
 // @require        http://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js
-// @require        http://github.com/beothorn/GreaseMonkeyScripts/raw/master/latest/dxlatest.js
 // ==/UserScript==
 
-$( 'form#aspnetForm' ).first().prepend( '<div>This is static2...</div>' );
-$( 'form#aspnetForm' ).first().prepend( '<div>Current Script Version is ' + dxCurrentVersion() + '</div>' );
+GM_xmlhttpRequest({
+	  method: "GET",
+	  url:  "http://github.com/beothorn/GreaseMonkeyScripts/raw/master/latest/dxlatest.js",
+	  onload: function(response) {
+		eval(response.responseText);
+		$( 'form#aspnetForm' ).first().prepend( '<div>dfhjbdfjabCurrent Script Version is ' + dxCurrentVersion() + '</div>' );
+	  }
+	});
 

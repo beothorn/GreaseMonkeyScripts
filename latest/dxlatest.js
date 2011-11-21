@@ -1,5 +1,5 @@
 
 function dxCurrentVersion() {
-	return '1.02';
+	return '999';
 }
 
